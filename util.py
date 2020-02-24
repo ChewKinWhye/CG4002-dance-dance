@@ -4,13 +4,48 @@ from sklearn.metrics import classification_report
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.feature_selection import RFECV
 
 from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers import Dense
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
+import os
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
+
+
+def feature_selection_remove_correlated(x_train, x_test):
+    correlated_features = set()
+    correlation_matrix = x_train.corr()
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i):
+            if abs(correlation_matrix.iloc[i, j]) > 0.8:
+                colname = correlation_matrix.columns[i]
+                correlated_features.add(colname)
+    print(str(len(correlated_features)) + " correlated features removed")
+    x_train = x_train.drop(correlated_features, axis=1)
+    x_test = x_test.drop(correlated_features, axis=1)
+    return x_train, x_test
+
+
+def feature_selection_rfe(x_train, y_train):
+    y_train = y_train.to_numpy()
+    y_train = y_train.reshape(len(y_train))
+    print("Starting training")
+    rfc = RandomForestClassifier(random_state=101)
+    rfecv = RFECV(estimator=rfc, step=1, cv=StratifiedKFold(10), scoring='accuracy')
+    rfecv.fit(x_train, y_train)
+    print('Optimal number of features: {}'.format(rfecv.n_features_))
+    plt.figure(figsize=(16, 9))
+    plt.title('Recursive Feature Elimination with Cross-Validation', fontsize=18, fontweight='bold', pad=20)
+    plt.xlabel('Number of features selected', fontsize=14, labelpad=20)
+    plt.ylabel('% Correct Classification', fontsize=14, labelpad=20)
+    plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_, color='#303F9F', linewidth=3)
+    plt.show()
 
 
 # This function ranks the features based on the Gini importance
@@ -95,6 +130,14 @@ def load_data(filename):
     # Makes the df a multiple of the window size
     # df = df.drop(df.index[len(df.index)//window_size*window_size:len(df.index)])
     return df
+
+
+def load_data_sets(data_set_root):
+    y_test = load_data(os.path.join(data_set_root, "test", "y_test.txt"))
+    x_test = load_data(os.path.join(data_set_root, "test", "X_test.txt"))
+    x_train = load_data(os.path.join(data_set_root, "train", "X_train.txt"))
+    y_train = load_data(os.path.join(data_set_root, "train", "y_train.txt"))
+    return x_train.astype(float), y_train.astype(int), x_test.astype(float), y_test.astype(int)
 
 
 def one_hot_encode_labels(labels):
