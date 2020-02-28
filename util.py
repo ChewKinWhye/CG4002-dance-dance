@@ -38,7 +38,7 @@ def feature_selection_rfe(x_train, y_train):
     print("Starting training")
     rfc = RandomForestClassifier(random_state=101)
     rfecv = RFECV(estimator=rfc, step=1, cv=StratifiedKFold(10), scoring='accuracy')
-    rfecv.fit(x_train, y_train)
+    selector = rfecv.fit(x_train, y_train)
     print('Optimal number of features: {}'.format(rfecv.n_features_))
     plt.figure(figsize=(16, 9))
     plt.title('Recursive Feature Elimination with Cross-Validation', fontsize=18, fontweight='bold', pad=20)
@@ -46,6 +46,8 @@ def feature_selection_rfe(x_train, y_train):
     plt.ylabel('% Correct Classification', fontsize=14, labelpad=20)
     plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_, color='#303F9F', linewidth=3)
     plt.show()
+    print(selector.support_)
+    print(selector.ranking_)
 
 
 # This function ranks the features based on the Gini importance
@@ -81,7 +83,7 @@ def feature_selection_f_value(x_test, y_test):
 
 def create_model():
     model = Sequential()
-    model.add(Dense(32, input_dim=561, activation='relu'))
+    model.add(Dense(32, input_dim=1536, activation='relu'))
     model.add(Dense(32, activation='relu'))
     model.add(Dense(6, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -119,7 +121,7 @@ def load_model(model_name):
     return loaded_model
 
 
-def load_data(filename):
+def load_data_uci(filename):
     file = open(filename, "r")
     lines_split = []
     for line in file:
@@ -132,11 +134,11 @@ def load_data(filename):
     return df
 
 
-def load_data_sets(data_set_root):
-    y_test = load_data(os.path.join(data_set_root, "test", "y_test.txt"))
-    x_test = load_data(os.path.join(data_set_root, "test", "X_test.txt"))
-    x_train = load_data(os.path.join(data_set_root, "train", "X_train.txt"))
-    y_train = load_data(os.path.join(data_set_root, "train", "y_train.txt"))
+def load_data_sets_uci(data_set_root):
+    y_test = load_data_uci(os.path.join(data_set_root, "test", "y_test.txt"))
+    x_test = load_data_uci(os.path.join(data_set_root, "test", "X_test.txt"))
+    x_train = load_data_uci(os.path.join(data_set_root, "train", "X_train.txt"))
+    y_train = load_data_uci(os.path.join(data_set_root, "train", "y_train.txt"))
     return x_train.astype(float), y_train.astype(int), x_test.astype(float), y_test.astype(int)
 
 
@@ -144,3 +146,44 @@ def one_hot_encode_labels(labels):
     one_hot_encoder = OneHotEncoder(sparse=False)
     one_hot_encoded = one_hot_encoder.fit_transform(labels)
     return one_hot_encoded
+
+
+def load_data_from_csv(csv_file_name):
+    data = pd.read_csv(csv_file_name)
+    return data
+
+
+def load_data_motion_sense(filename, root_dir, lookup, time_step):
+    first = True
+    for csv_files in os.listdir(os.path.join(root_dir, filename)):
+        if csv_files.find('.csv'):
+            if first:
+                data_set_x = load_data_from_csv(os.path.join(root_dir, filename, csv_files))
+                first = False
+            data = load_data_from_csv(os.path.join(root_dir, filename, csv_files))
+            data_set_x = data_set_x.append(data)
+
+    data_set_x = continuous_to_time_step(data_set_x, time_step, 12)
+    label = np.full(len(data_set_x), lookup[filename[0:3]])
+    data_set_y = pd.DataFrame(label, columns=['Labels'])
+    return data_set_x, data_set_y
+
+
+def load_data_sets_motion_sense(root_dir, lookup, time_step):
+    first = True
+    for folders in os.listdir(root_dir):
+        if first:
+            data_set_x, data_set_y = load_data_motion_sense(folders, root_dir, lookup, time_step)
+            first = False
+        temp_x, temp_y = load_data_motion_sense(folders, root_dir, lookup, time_step)
+        data_set_x = data_set_x.append(temp_x)
+        data_set_y = data_set_y.append(temp_y)
+    return data_set_x, data_set_y
+
+
+def continuous_to_time_step(x, window_size, num_features):
+    x.drop(x.iloc[:, 0:1], inplace=True, axis=1)
+    x = x.head(len(x) - len(x)%window_size)
+    x = x.to_numpy()
+    x = x.reshape((int(x.shape[0]/window_size), num_features*window_size))
+    return pd.DataFrame(x)
