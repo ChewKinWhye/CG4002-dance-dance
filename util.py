@@ -14,8 +14,7 @@ from keras.layers import Dense
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-from sklearn.feature_selection import RFE
-from sklearn.linear_model import LogisticRegression
+from feature_extraction import extract_features
 
 
 def feature_selection_remove_correlated(x_train, x_test):
@@ -83,7 +82,7 @@ def feature_selection_f_value(x_test, y_test):
 
 def create_model():
     model = Sequential()
-    model.add(Dense(32, input_dim=1536, activation='relu'))
+    model.add(Dense(32, input_dim=210, activation='relu'))
     model.add(Dense(32, activation='relu'))
     model.add(Dense(6, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -164,6 +163,7 @@ def load_data_motion_sense(filename, root_dir, lookup, time_step):
             data_set_x = data_set_x.append(data)
 
     data_set_x = continuous_to_time_step(data_set_x, time_step, 12)
+    data_set_x = extract_features(data_set_x)
     label = np.full(len(data_set_x), lookup[filename[0:3]])
     data_set_y = pd.DataFrame(label, columns=['Labels'])
     return data_set_x, data_set_y
@@ -181,9 +181,18 @@ def load_data_sets_motion_sense(root_dir, lookup, time_step):
     return data_set_x, data_set_y
 
 
+# Returns a rows * window_size * num_features array
 def continuous_to_time_step(x, window_size, num_features):
     x.drop(x.iloc[:, 0:1], inplace=True, axis=1)
-    x = x.head(len(x) - len(x)%window_size)
-    x = x.to_numpy()
-    x = x.reshape((int(x.shape[0]/window_size), num_features*window_size))
-    return pd.DataFrame(x)
+    first = True
+    for i in range(0, num_features):
+        column = x.iloc[:, i:i+1]
+        column = column.head(len(column) - len(column)%window_size)
+        column = column.to_numpy()
+        column = column.reshape((int(column.shape[0] / window_size), window_size))
+        if first:
+            data_reshaped = column
+            first = False
+        else:
+            data_reshaped = np.dstack((data_reshaped, column))
+    return data_reshaped
