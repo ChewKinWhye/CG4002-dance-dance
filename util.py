@@ -82,7 +82,7 @@ def feature_selection_f_value(x_test, y_test):
 
 def create_model():
     model = Sequential()
-    model.add(Dense(32, input_dim=210, activation='relu'))
+    model.add(Dense(32, input_dim=308, activation='relu'))
     model.add(Dense(32, activation='relu'))
     model.add(Dense(6, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
