@@ -10,9 +10,10 @@ print("Data sets loaded")
 
 X_train, X_test = feature_selection_remove_correlated(X_train, X_test)
 
+print(np.asanyarray(X_train).shape)
 
 # Create model
-model = create_model()
+model = create_model(145)
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 # Train model
 model.fit(X_train, Y_train_OHE, validation_data=(X_test, Y_test_OHE), epochs=2000,

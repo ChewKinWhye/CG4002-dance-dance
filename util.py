@@ -7,6 +7,7 @@ from sklearn.feature_selection import f_classif
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.feature_selection import RFECV
+from sklearn.svm import SVC
 
 from keras.models import model_from_json
 from keras.models import Sequential
@@ -80,13 +81,18 @@ def feature_selection_f_value(x_test, y_test):
 #     g = sns.heatmap(x_test[top_corr_features].corr(), annot=True, cmap="RdYlGn")
 
 
-def create_model():
+def create_neural_network_model(input_dimension):
     model = Sequential()
-    model.add(Dense(32, input_dim=308, activation='relu'))
+    model.add(Dense(32, input_dim=input_dimension, activation='relu'))
     model.add(Dense(32, activation='relu'))
     model.add(Dense(6, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
+
+
+def create_svm_model():
+    clf = SVC(gamma='auto')
+    return clf
 
 
 def test_model(model_to_test, x_test, y_test):
@@ -128,8 +134,6 @@ def load_data_uci(filename):
         lines_split.append(line_split)
     df = pd.DataFrame(lines_split)
     df = df.dropna()
-    # Makes the df a multiple of the window size
-    # df = df.drop(df.index[len(df.index)//window_size*window_size:len(df.index)])
     return df
 
 
@@ -159,8 +163,9 @@ def load_data_motion_sense(filename, root_dir, lookup, time_step):
             if first:
                 data_set_x = load_data_from_csv(os.path.join(root_dir, filename, csv_files))
                 first = False
-            data = load_data_from_csv(os.path.join(root_dir, filename, csv_files))
-            data_set_x = data_set_x.append(data)
+            else:
+                data = load_data_from_csv(os.path.join(root_dir, filename, csv_files))
+                data_set_x = data_set_x.append(data)
 
     data_set_x = continuous_to_time_step(data_set_x, time_step, 12)
     data_set_x = extract_features(data_set_x)
@@ -172,12 +177,17 @@ def load_data_motion_sense(filename, root_dir, lookup, time_step):
 def load_data_sets_motion_sense(root_dir, lookup, time_step):
     first = True
     for folders in os.listdir(root_dir):
+        print(folders)
         if first:
             data_set_x, data_set_y = load_data_motion_sense(folders, root_dir, lookup, time_step)
             first = False
-        temp_x, temp_y = load_data_motion_sense(folders, root_dir, lookup, time_step)
-        data_set_x = data_set_x.append(temp_x)
-        data_set_y = data_set_y.append(temp_y)
+        else:
+            temp_x, temp_y = load_data_motion_sense(folders, root_dir, lookup, time_step)
+            data_set_x = data_set_x.append(temp_x)
+            data_set_y = data_set_y.append(temp_y)
+        print(np.asarray(data_set_x).shape)
+        print(np.asarray(data_set_y).shape)
+    data_set_y = data_set_y.dropna()
     return data_set_x, data_set_y
 
 
