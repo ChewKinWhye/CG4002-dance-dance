@@ -13,13 +13,13 @@ X_train, X_test = feature_selection_remove_correlated(X_train, X_test)
 print(np.asanyarray(X_train).shape)
 
 # Create model
-model = create_model(145)
+model = create_neural_network_model(145)
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 # Train model
 model.fit(X_train, Y_train_OHE, validation_data=(X_test, Y_test_OHE), epochs=2000,
           batch_size=8, shuffle=True, callbacks=[es])
 
 save_model(model, "First_attempt")
-test_model(model, X_test, Y_test)
+test_model_nn(model, X_test, Y_test)
 
 

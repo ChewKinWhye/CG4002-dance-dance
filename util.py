@@ -8,6 +8,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.feature_selection import RFECV
 from sklearn.svm import SVC
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
 
 from keras.models import model_from_json
 from keras.models import Sequential
@@ -83,8 +85,9 @@ def feature_selection_f_value(x_test, y_test):
 
 def create_neural_network_model(input_dimension):
     model = Sequential()
-    model.add(Dense(32, input_dim=input_dimension, activation='relu'))
-    model.add(Dense(32, activation='relu'))
+    model.add(Dense(256, input_dim=input_dimension, activation='relu'))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(128, activation='relu'))
     model.add(Dense(6, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
@@ -95,15 +98,23 @@ def create_svm_model():
     return clf
 
 
-def test_model(model_to_test, x_test, y_test):
-    predictions = model_to_test.predict(x_test, batch_size=64, verbose=1)
+def test_model_nn(model_to_test, x_test, y_test):
+    predictions = model_to_test.predict(x_test)
     predictions_boolean = np.argmax(predictions, axis=1)
-    print(predictions_boolean)
     # Count start from 1
     predictions_boolean += 1
     y_test = y_test.astype(int)
-    print(y_test)
     print(classification_report(y_test, predictions_boolean))
+    return confusion_matrix(y_test, predictions_boolean), accuracy_score(y_test, predictions_boolean)
+
+
+def test_model_svm(model_to_test, x_test, y_test):
+    predictions = model_to_test.predict(x_test)
+    print(predictions)
+    predictions = predictions.astype(int)
+    y_test = y_test.astype(int)
+    print(classification_report(y_test, predictions))
+    return confusion_matrix(y_test, predictions), accuracy_score(y_test, predictions)
 
 
 def save_model(model_to_save, name):
@@ -127,13 +138,13 @@ def load_model(model_name):
 
 
 def load_data_uci(filename):
-    file = open(filename, "r")
-    lines_split = []
-    for line in file:
-        line_split = line.split()
-        lines_split.append(line_split)
-    df = pd.DataFrame(lines_split)
-    df = df.dropna()
+    with open(filename, "r") as file:
+        lines_split = []
+        for line in file:
+            line_split = line.split()
+            lines_split.append(line_split)
+        df = pd.DataFrame(lines_split)
+        df = df.dropna()
     return df
 
 
