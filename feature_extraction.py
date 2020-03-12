@@ -45,6 +45,7 @@ def obtain_correlation_coefficient(data1, data2):
     return corr
 
 
+# Signal magnitude area
 def obtain_sma(data_x, data_y, data_z):
     sma = 0
     for i in range(len(data_x)):

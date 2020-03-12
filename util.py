@@ -188,7 +188,6 @@ def load_data_motion_sense(filename, root_dir, lookup, time_step):
 def load_data_sets_motion_sense(root_dir, lookup, time_step):
     first = True
     for folders in os.listdir(root_dir):
-        print(folders)
         if first:
             data_set_x, data_set_y = load_data_motion_sense(folders, root_dir, lookup, time_step)
             first = False

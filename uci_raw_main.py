@@ -31,7 +31,6 @@ def load_data_set_raw():
 
 x_data, y_data = load_data_set_raw()
 y_OHE_data = one_hot_encode_labels(y_data)
-
 # Neural network
 model_nn = create_neural_network_model(172)
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
@@ -69,6 +68,6 @@ print(confusion_matrix_total/10)
 print(accuracy_total/10)
 
 # Single example
-data_point = x_data[0]
+data_point = x_data[0:1]
 y = model_nn.predict(data_point)
 print(y)
