@@ -1,5 +1,5 @@
 from keras.callbacks import EarlyStopping
-from util import *
+from old_code_unused.util import *
 data_set_root = "Data-sets/UCI-HAR-Data-set/UCI-HAR-Data-set"
 
 # Load data sets

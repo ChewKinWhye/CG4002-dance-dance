@@ -1,5 +1,5 @@
 from keras.callbacks import EarlyStopping
-from util import *
+from old_code_unused.util import *
 import os
 import numpy as np
 from sklearn.model_selection import KFold # import KFold
@@ -32,7 +32,7 @@ def load_data_set_raw():
 x_data, y_data = load_data_set_raw()
 y_OHE_data = one_hot_encode_labels(y_data)
 # Neural network
-model_nn = create_neural_network_model(172)
+model_nn = create_neural_network_model(87)
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 # K-fold cross validation
 kf = KFold(n_splits=10)
@@ -46,22 +46,6 @@ for train_index, test_index in kf.split(x_data):
                  batch_size=8, shuffle=True, callbacks=[es])
     save_model(model_nn, "neural_network_model")
     confusion_matrix, accuracy = test_model_nn(model_nn, x_test, y_data[test_index])
-    confusion_matrix_total += confusion_matrix
-    accuracy_total += accuracy
-print(confusion_matrix_total/10)
-print(accuracy_total/10)
-
-# Support vector machin vbe
-kf = KFold(n_splits=10)
-kf.get_n_splits(x_data)
-confusion_matrix_total = np.zeros((6, 6))
-accuracy_total = 0
-for train_index, test_index in kf.split(x_data):
-    x_train, x_test = x_data[train_index], x_data[test_index]
-    y_train, y_test = y_data[train_index], y_data[test_index]
-    model_svm = create_svm_model()
-    model_svm.fit(x_train, y_train)
-    confusion_matrix, accuracy = test_model_svm(model_svm, x_test, y_test)
     confusion_matrix_total += confusion_matrix
     accuracy_total += accuracy
 print(confusion_matrix_total/10)

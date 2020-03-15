@@ -1,4 +1,4 @@
-from util import *
+from old_code_unused.util import *
 
 model_nn = create_neural_network_model(172)
 

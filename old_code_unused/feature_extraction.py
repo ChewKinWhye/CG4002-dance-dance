@@ -390,26 +390,26 @@ def extract_features(data):
         features.extend(extract_features_t_body_acc(two_d_data_transpose[9], two_d_data_transpose[10],
                                                     two_d_data_transpose[11]))
 
-        features.extend(extract_features_t_body_acc_jerk(two_d_data_transpose[15], two_d_data_transpose[16],
-                                                         two_d_data_transpose[17]))
+        # features.extend(extract_features_t_body_acc_jerk(two_d_data_transpose[15], two_d_data_transpose[16],
+        #                                                  two_d_data_transpose[17]))
         features.extend(extract_features_t_body_acc_mag(two_d_data_transpose[18]))
-        features.extend(extract_features_t_body_acc_jerk_mag(two_d_data_transpose[21]))
-        features.extend(extract_features_t_gravity_acc(two_d_data_transpose[3], two_d_data_transpose[4],
-                                                       two_d_data_transpose[5]))
+        # features.extend(extract_features_t_body_acc_jerk_mag(two_d_data_transpose[21]))
+        # features.extend(extract_features_t_gravity_acc(two_d_data_transpose[3], two_d_data_transpose[4],
+        #                                                two_d_data_transpose[5]))
         features.extend(extract_features_t_body_gyro(two_d_data_transpose[6], two_d_data_transpose[7],
                                                      two_d_data_transpose[8]))
-        features.extend(extract_features_t_body_gyro_jerk(two_d_data_transpose[12], two_d_data_transpose[13],
-                                                          two_d_data_transpose[14]))
+        # features.extend(extract_features_t_body_gyro_jerk(two_d_data_transpose[12], two_d_data_transpose[13],
+        #                                                   two_d_data_transpose[14]))
         features.extend(extract_features_t_body_gyro_mag(two_d_data_transpose[20]))
-        features.extend(extract_features_t_body_gyro_jerk_mag(two_d_data_transpose[21]))
+        # features.extend(extract_features_t_body_gyro_jerk_mag(two_d_data_transpose[21]))
 
         # Start extracting frequency features
         features.extend(extract_features_f_body_acc(two_d_data_transpose[22], two_d_data_transpose[23],
                                                     two_d_data_transpose[24]))
-        features.extend(extract_features_f_body_acc_jerk(two_d_data_transpose[25], two_d_data_transpose[26],
-                                                         two_d_data_transpose[27]))
+        # features.extend(extract_features_f_body_acc_jerk(two_d_data_transpose[25], two_d_data_transpose[26],
+        #                                                  two_d_data_transpose[27]))
         features.extend(extract_features_f_body_acc_mag(two_d_data_transpose[28]))
-        features.extend(extract_features_f_body_acc_jerk_mag(two_d_data_transpose[29]))
+        # features.extend(extract_features_f_body_acc_jerk_mag(two_d_data_transpose[29]))
 
         features.extend(extract_features_f_body_gyro(two_d_data_transpose[30], two_d_data_transpose[31],
                                                      two_d_data_transpose[32]))

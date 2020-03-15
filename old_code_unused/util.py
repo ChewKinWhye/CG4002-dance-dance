@@ -17,7 +17,7 @@ from keras.layers import Dense
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-from feature_extraction import extract_features
+from main_code.feature_extraction_final import extract_features
 
 
 def feature_selection_remove_correlated(x_train, x_test):

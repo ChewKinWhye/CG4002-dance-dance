@@ -1,5 +1,5 @@
 from keras.callbacks import EarlyStopping
-from util import *
+from old_code_unused.util import *
 root_dir = "Data-sets/motionsense-dataset/A_DeviceMotion_data/A_DeviceMotion_data"
 lookup = {"dws": 1, "jog": 2, "sit": 3, "std": 4, "ups": 5, "wlk": 6}
 time_step = 128
