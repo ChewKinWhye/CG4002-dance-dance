@@ -1,26 +1,8 @@
-from main_code.util_main import *
+from util_main import *
 from keras.callbacks import EarlyStopping
 from sklearn.model_selection import KFold
-from keras import backend as K
 import tensorflow as tf
 import numpy as np
-
-
-def freeze_session(session, keep_var_names=None, output_names=None, clear_devices=True):
-    graph = session.graph
-    with graph.as_default():
-        freeze_var_names = list(set(v.op.name for v in tf.global_variables()).difference(keep_var_names or []))
-        output_names = output_names or []
-        output_names += [v.op.name for v in tf.global_variables()]
-        # Graph -> GraphDef ProtoBuf
-        input_graph_def = graph.as_graph_def()
-        if clear_devices:
-            for node in input_graph_def.node:
-                node.device = ""
-        frozen_graph = tf.compat.v1.graph_util.convert_variables_to_constants(session, input_graph_def,
-                                                      output_names, freeze_var_names)
-        return frozen_graph
-
 
 data_set_path = "Data-sets/Dance_Data"
 sampling_rate = 20
@@ -33,7 +15,7 @@ print("Label shape:", np.asarray(y_data).shape)
 y_OHE_data = one_hot_encode_labels(y_data)
 
 model_nn = create_neural_network_model(input_dimension=x_data.shape[1], output_dimension=y_OHE_data.shape[1])
-
+print(x_data.shape[1])
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 # K-fold cross validation, only used for model evaluation
 kf = KFold(n_splits=10)
@@ -49,11 +31,13 @@ for train_index, test_index in kf.split(x_data):
     confusion_matrix, accuracy = test_model_nn(model_nn, x_test, y_data[test_index])
     # confusion_matrix_total += confusion_matrix
     accuracy_total += accuracy
+    # break
 # print(confusion_matrix_total/10)
 print("Accuracy: " + str(accuracy_total*10) + "%")
 
 
+# Load model
 # Single example
-# data_point = x_data[0:1]
-# y = model_nn.predict(data_point)
-# print(y)
+data_point = x_data[0:1]
+y = model_nn.predict(data_point)
+print(y)
