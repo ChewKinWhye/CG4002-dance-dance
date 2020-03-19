@@ -7,7 +7,7 @@ from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers import Dense
 
-from main_code.feature_extraction_final import extract_features
+from feature_extraction_final import extract_features
 
 import os
 import numpy as np
@@ -123,6 +123,7 @@ def load_dance_dance_action(text_file_path, text_file_partial_path, sampling_rat
         window_slice_raw = []
         for ii in range(num_data_points):
             window_slice_raw.append(x_partial_data_raw[i*num_data_points + ii])
+        window_slice_raw = np.asarray(window_slice_raw)[:, 0:3].tolist()
         window_slice_features = extract_features(window_slice_raw)
         x_partial_data.append(window_slice_features)
     y_partial_data = np.full(len(x_partial_data), lookup[text_file_partial_path])

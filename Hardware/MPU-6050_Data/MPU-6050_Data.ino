@@ -10,7 +10,7 @@
 #define GYRO_SCALE 0
 #define PERIOD 50
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
-int ctrl = 0;
+int ctrl = 1;
 void setup(){
   Wire.begin();
   sensor_write_reg(PWR_MGMT_1, 0); // set to 0 to wakes up the MPU-6050
@@ -48,7 +48,7 @@ void loop(){
   Serial.print(gyro_preproc(GyZ));
   Serial.print("\n");
   while(millis() < current_time + PERIOD) {
-    ; //wait until PERIOD ms
+    ; // wait until PERIOD ms
   }
 }
 void sensor_write_reg(int reg, uint8_t data){

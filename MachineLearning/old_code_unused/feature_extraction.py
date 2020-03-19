@@ -276,6 +276,65 @@ def extract_features_f_body_gyro(f_body_gyro_x, f_body_gyro_y, f_body_gyro_z):
     return features
 
 
+	def extract_features_f_body_acc_jerk_mag(f_body_acc_jerk_mag):
+    freqs = fftfreq(len(f_body_acc_jerk_mag))
+    mask = freqs >= 0
+    f_body_acc_jerk_mag = 2 * f_body_acc_jerk_mag[mask]
+    features = []
+    features.append(obtain_min(f_body_acc_jerk_mag))
+    features.append(obtain_max_index(f_body_acc_jerk_mag))
+    features.append(obtain_mean(f_body_acc_jerk_mag))
+    features.append(obtain_skewness(f_body_acc_jerk_mag))
+    return features
+
+
+def extract_features_f_body_gyro(f_body_gyro_x, f_body_gyro_y, f_body_gyro_z):
+    freqs = fftfreq(len(f_body_gyro_x))
+    mask = freqs >= 0
+    f_body_gyro_x = 2 * f_body_gyro_x[mask]
+    f_body_gyro_y = 2 * f_body_gyro_y[mask]
+    f_body_gyro_z = 2 * f_body_gyro_z[mask]
+    features = []
+    features.append(obtain_min(f_body_gyro_x))
+    features.append(obtain_min(f_body_gyro_y))
+    features.append(obtain_min(f_body_gyro_z))
+    features.append(obtain_max_index(f_body_gyro_x))
+    features.append(obtain_max_index(f_body_gyro_y))
+    features.append(obtain_max_index(f_body_gyro_z))
+    features.append(obtain_mean(f_body_gyro_x))
+    features.append(obtain_mean(f_body_gyro_y))
+    features.append(obtain_mean(f_body_gyro_z))
+    features.append(obtain_skewness(f_body_gyro_x))
+    features.append(obtain_skewness(f_body_gyro_y))
+    features.append(obtain_skewness(f_body_gyro_z))
+    # features.append(obtain_band_energy(f_body_gyro_x, 49, 56))
+    # features.append(obtain_band_energy(f_body_gyro_y, 49, 56))
+    # features.append(obtain_band_energy(f_body_gyro_z, 49, 56))
+    return features
+
+
+def extract_features_f_body_gyro_mag(f_body_gyro_mag):
+    freqs = fftfreq(len(f_body_gyro_mag))
+    mask = freqs >= 0
+    f_body_gyro_mag = 2 * f_body_gyro_mag[mask]
+    features = []
+    features.append(obtain_min(f_body_gyro_mag))
+    features.append(obtain_max(f_body_gyro_mag))
+    features.append(obtain_max_index(f_body_gyro_mag))
+    features.append(obtain_skewness(f_body_gyro_mag))
+    return features
+
+
+def extract_features_f_body_gyro_jerk_mag(f_body_gyro_jerk_mag):
+    freqs = fftfreq(len(f_body_gyro_jerk_mag))
+    mask = freqs >= 0
+    f_body_gyro_jerk_mag = 2 * f_body_gyro_jerk_mag[mask]
+    features = []
+    features.append(obtain_max_index(f_body_gyro_jerk_mag))
+    features.append(obtain_mean(f_body_gyro_jerk_mag))
+    features.append(obtain_skewness(f_body_gyro_jerk_mag))
+    return features
+	
 def extract_features_f_body_gyro_mag(f_body_gyro_mag):
     freqs = fftfreq(128)
     mask = freqs >= 0
