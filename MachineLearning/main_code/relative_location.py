@@ -1,4 +1,4 @@
-from util_main import *
+from MachineLearning.main_code.util_main import *
 
 model_nn = create_neural_network_model(172)
 
