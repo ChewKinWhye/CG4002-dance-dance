@@ -7,7 +7,7 @@ from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers import Dense
 
-from feature_extraction_final import extract_features
+from MachineLearning.main_code.feature_extraction_final import extract_features
 
 import os
 import numpy as np
@@ -100,6 +100,7 @@ def load_dance_dance_data_set(folder_path, sampling_rate, window_length):
         x_partial_data, y_partial_data = load_dance_dance_action(full_path, text_file, sampling_rate, window_length)
         x_data.extend(x_partial_data)
         y_data.extend(y_partial_data)
+        print(np.asarray(x_partial_data).shape)
     y_data = np.asarray(y_data).reshape(-1, 1)
     return np.asarray(x_data), y_data
 
@@ -108,7 +109,8 @@ def load_dance_dance_data_set(folder_path, sampling_rate, window_length):
 # and returns the x and y data, with the features extracted
 def load_dance_dance_action(text_file_path, text_file_partial_path, sampling_rate, window_length):
     lookup = {"dumbbells.txt": 1, "face_wipe.txt": 2, "muscle.txt": 3, "pac_man.txt": 4,
-              "shooting_star.txt": 5, "shout_out.txt": 6, "tornado.txt": 7, "weight_lifting.txt": 8}
+              "shooting_star.txt": 5, "shout_out.txt": 6, "tornado.txt": 7, "weight_lifting.txt": 8,
+              "right.txt": 9, "left.txt": 10, "nothing.txt": 11}
 
     num_data_points = int(sampling_rate * window_length)
     x_partial_data_raw = []
@@ -119,12 +121,12 @@ def load_dance_dance_action(text_file_path, text_file_partial_path, sampling_rat
             string_split = list(map(float, string_split))
             x_partial_data_raw.append(string_split)
     # Extract features
-    for i in range(len(x_partial_data_raw)//num_data_points):
+    for i in range(len(x_partial_data_raw)//num_data_points*2-1):
         window_slice_raw = []
         for ii in range(num_data_points):
-            window_slice_raw.append(x_partial_data_raw[i*num_data_points + ii])
+            window_slice_raw.append(x_partial_data_raw[i*num_data_points//2 + ii])
+        window_slice_raw = np.asarray(window_slice_raw)[:, 0:3].tolist()
         window_slice_features = extract_features(window_slice_raw)
         x_partial_data.append(window_slice_features)
     y_partial_data = np.full(len(x_partial_data), lookup[text_file_partial_path])
     return x_partial_data, y_partial_data
-

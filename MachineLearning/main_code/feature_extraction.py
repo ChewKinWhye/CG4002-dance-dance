@@ -276,18 +276,6 @@ def extract_features_f_body_gyro(f_body_gyro_x, f_body_gyro_y, f_body_gyro_z):
     return features
 
 
-def extract_features_f_body_gyro_mag(f_body_gyro_mag):
-    freqs = fftfreq(len(f_body_gyro_mag))
-    mask = freqs >= 0
-    f_body_gyro_mag = 2 * f_body_gyro_mag[mask]
-    features = []
-    features.append(obtain_min(f_body_gyro_mag))
-    features.append(obtain_max(f_body_gyro_mag))
-    features.append(obtain_max_index(f_body_gyro_mag))
-    features.append(obtain_skewness(f_body_gyro_mag))
-    return features
-
-
 def extract_features_f_body_gyro_jerk_mag(f_body_gyro_jerk_mag):
     freqs = fftfreq(len(f_body_gyro_jerk_mag))
     mask = freqs >= 0
@@ -299,124 +287,135 @@ def extract_features_f_body_gyro_jerk_mag(f_body_gyro_jerk_mag):
     return features
 
 
-def extract_features(data):
+def extract_features_f_body_gyro_mag(f_body_gyro_mag):
+    freqs = fftfreq(len(f_body_gyro_mag))
+    mask = freqs >= 0
+    f_body_gyro_mag = 2 * f_body_gyro_mag[mask]
+    features = []
+    features.append(obtain_max_index(f_body_gyro_mag))
+    features.append(obtain_mean(f_body_gyro_mag))
+    features.append(obtain_skewness(f_body_gyro_mag))
+    return features
+
+
+def extract_features(two_d_data):
     # Each two_d_data gives us a 128*12 matrix
-    features_total = []
-    for two_d_data in data:
-        two_d_data_transpose = two_d_data.T
-        features = []
-        # Each row gives us a 128 matrix
-        # Add Gyro Jerk
-        gyro_jerk_x = np.gradient(two_d_data_transpose[6])
-        gyro_jerk_y = np.gradient(two_d_data_transpose[7])
-        gyro_jerk_z = np.gradient(two_d_data_transpose[8])
-        two_d_data_transpose = np.append(two_d_data_transpose, gyro_jerk_x.reshape(1, len(gyro_jerk_x)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose, gyro_jerk_y.reshape(1, len(gyro_jerk_y)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose, gyro_jerk_z.reshape(1, len(gyro_jerk_z)), axis=0)
-        # Add Acc Jerk
-        acc_jerk_x = np.gradient(two_d_data_transpose[9])
-        acc_jerk_y = np.gradient(two_d_data_transpose[10])
-        acc_jerk_z = np.gradient(two_d_data_transpose[11])
-        two_d_data_transpose = np.append(two_d_data_transpose, acc_jerk_x.reshape(1, len(acc_jerk_x)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose, acc_jerk_y.reshape(1, len(acc_jerk_y)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose, acc_jerk_z.reshape(1, len(acc_jerk_z)), axis=0)
-        # Add Acc magnitude
-        acc_data_magnitude = obtain_magnitude(two_d_data_transpose[9], two_d_data_transpose[10],
-                                              two_d_data_transpose[11])
-        two_d_data_transpose = np.append(two_d_data_transpose, acc_data_magnitude.reshape(1, len(acc_data_magnitude)), axis=0)
-        # Add Acc jerk magnitude
-        acc_data_jerk_magnitude = obtain_magnitude(two_d_data_transpose[15], two_d_data_transpose[16],
-                                                   two_d_data_transpose[17])
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         acc_data_jerk_magnitude.reshape(1, len(acc_data_jerk_magnitude)), axis=0)
-        # Add Gyro magnitude
-        gyro_data_magnitude = obtain_magnitude(two_d_data_transpose[6], two_d_data_transpose[7],
-                                               two_d_data_transpose[8])
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         gyro_data_magnitude.reshape(1, len(gyro_data_magnitude)), axis=0)
-        # Add Gyro jerk magnitude
-        gyro_data_jerk_magnitude = obtain_magnitude(two_d_data_transpose[12], two_d_data_transpose[13],
-                                                    two_d_data_transpose[14])
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         gyro_data_jerk_magnitude.reshape(1, len(gyro_data_jerk_magnitude)), axis=0)
-        # Add Frequency body Acceleration
-        f_body_acc_x = np.abs(fft(np.asanyarray(two_d_data_transpose[9])) / 128)
-        f_body_acc_y = np.abs(fft(np.asanyarray(two_d_data_transpose[10])) / 128)
-        f_body_acc_z = np.abs(fft(np.asanyarray(two_d_data_transpose[11])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_acc_x.reshape(1, len(f_body_acc_x)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_acc_y.reshape(1, len(f_body_acc_y)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_acc_z.reshape(1, len(f_body_acc_z)), axis=0)
-        # Add Frequency body jerk Acceleration
-        f_body_jerk_acc_x = np.abs(fft(np.asanyarray(two_d_data_transpose[15])) / 128)
-        f_body_jerk_acc_y = np.abs(fft(np.asanyarray(two_d_data_transpose[16])) / 128)
-        f_body_jerk_acc_z = np.abs(fft(np.asanyarray(two_d_data_transpose[17])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_jerk_acc_x.reshape(1, len(f_body_jerk_acc_x)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_jerk_acc_y.reshape(1, len(f_body_jerk_acc_y)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_jerk_acc_z.reshape(1, len(f_body_jerk_acc_z)), axis=0)
-        # Add Frequency body acceleration magnitude
-        f_body_acc_magnitude = np.abs(fft(np.asanyarray(two_d_data_transpose[18])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_acc_magnitude.reshape(1, len(f_body_acc_magnitude)), axis=0)
-        # Add Frequency body acceleration jerk magnitude
-        f_body_acc_jerk_magnitude = np.abs(fft(np.asanyarray(two_d_data_transpose[19])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_acc_jerk_magnitude.reshape(1, len(f_body_acc_jerk_magnitude)), axis=0)
-        # Add Frequency body gyro
-        f_body_gyro_x = np.abs(fft(np.asanyarray(two_d_data_transpose[6])) / 128)
-        f_body_gyro_y = np.abs(fft(np.asanyarray(two_d_data_transpose[7])) / 128)
-        f_body_gyro_z = np.abs(fft(np.asanyarray(two_d_data_transpose[8])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_gyro_x.reshape(1, len(f_body_gyro_x)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_gyro_y.reshape(1, len(f_body_gyro_y)), axis=0)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_gyro_z.reshape(1, len(f_body_gyro_z)), axis=0)
-        # Add Frequency body gyro mag
-        f_body_gyro_mag = np.abs(fft(np.asanyarray(two_d_data_transpose[20])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_gyro_mag.reshape(1, len(f_body_gyro_mag)), axis=0)
-        # Add Frequency body gyro jerk mag
-        f_body_gyro_jerk_mag = np.abs(fft(np.asanyarray(two_d_data_transpose[21])) / 128)
-        two_d_data_transpose = np.append(two_d_data_transpose,
-                                         f_body_gyro_jerk_mag.reshape(1, len(f_body_gyro_jerk_mag)), axis=0)
+    features = []
+    two_d_data = np.asarray(two_d_data)
+    two_d_data_transpose = two_d_data.T
 
-        # Start extracting time features
-        features.extend(extract_features_t_body_acc(two_d_data_transpose[9], two_d_data_transpose[10],
-                                                    two_d_data_transpose[11]))
+    # Each row gives us a 128 matrix
+    # Add Gyro Jerk
+    gyro_jerk_x = np.gradient(two_d_data_transpose[6])
+    gyro_jerk_y = np.gradient(two_d_data_transpose[7])
+    gyro_jerk_z = np.gradient(two_d_data_transpose[8])
+    two_d_data_transpose = np.append(two_d_data_transpose, gyro_jerk_x.reshape(1, len(gyro_jerk_x)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose, gyro_jerk_y.reshape(1, len(gyro_jerk_y)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose, gyro_jerk_z.reshape(1, len(gyro_jerk_z)), axis=0)
+    # Add Acc Jerk
+    acc_jerk_x = np.gradient(two_d_data_transpose[9])
+    acc_jerk_y = np.gradient(two_d_data_transpose[10])
+    acc_jerk_z = np.gradient(two_d_data_transpose[11])
+    two_d_data_transpose = np.append(two_d_data_transpose, acc_jerk_x.reshape(1, len(acc_jerk_x)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose, acc_jerk_y.reshape(1, len(acc_jerk_y)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose, acc_jerk_z.reshape(1, len(acc_jerk_z)), axis=0)
+    # Add Acc magnitude
+    acc_data_magnitude = obtain_magnitude(two_d_data_transpose[9], two_d_data_transpose[10],
+                                          two_d_data_transpose[11])
+    two_d_data_transpose = np.append(two_d_data_transpose, acc_data_magnitude.reshape(1, len(acc_data_magnitude)),
+                                     axis=0)
+    # Add Acc jerk magnitude
+    acc_data_jerk_magnitude = obtain_magnitude(two_d_data_transpose[15], two_d_data_transpose[16],
+                                               two_d_data_transpose[17])
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     acc_data_jerk_magnitude.reshape(1, len(acc_data_jerk_magnitude)), axis=0)
+    # Add Gyro magnitude
+    gyro_data_magnitude = obtain_magnitude(two_d_data_transpose[6], two_d_data_transpose[7],
+                                           two_d_data_transpose[8])
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     gyro_data_magnitude.reshape(1, len(gyro_data_magnitude)), axis=0)
+    # Add Gyro jerk magnitude
+    gyro_data_jerk_magnitude = obtain_magnitude(two_d_data_transpose[12], two_d_data_transpose[13],
+                                                two_d_data_transpose[14])
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     gyro_data_jerk_magnitude.reshape(1, len(gyro_data_jerk_magnitude)), axis=0)
+    # Add Frequency body Acceleration
+    f_body_acc_x = np.abs(fft(np.asanyarray(two_d_data_transpose[9])) / 128)
+    f_body_acc_y = np.abs(fft(np.asanyarray(two_d_data_transpose[10])) / 128)
+    f_body_acc_z = np.abs(fft(np.asanyarray(two_d_data_transpose[11])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_acc_x.reshape(1, len(f_body_acc_x)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_acc_y.reshape(1, len(f_body_acc_y)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_acc_z.reshape(1, len(f_body_acc_z)), axis=0)
+    # Add Frequency body jerk Acceleration
+    f_body_jerk_acc_x = np.abs(fft(np.asanyarray(two_d_data_transpose[15])) / 128)
+    f_body_jerk_acc_y = np.abs(fft(np.asanyarray(two_d_data_transpose[16])) / 128)
+    f_body_jerk_acc_z = np.abs(fft(np.asanyarray(two_d_data_transpose[17])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_jerk_acc_x.reshape(1, len(f_body_jerk_acc_x)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_jerk_acc_y.reshape(1, len(f_body_jerk_acc_y)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_jerk_acc_z.reshape(1, len(f_body_jerk_acc_z)), axis=0)
+    # Add Frequency body acceleration magnitude
+    f_body_acc_magnitude = np.abs(fft(np.asanyarray(two_d_data_transpose[18])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_acc_magnitude.reshape(1, len(f_body_acc_magnitude)), axis=0)
+    # Add Frequency body acceleration jerk magnitude
+    f_body_acc_jerk_magnitude = np.abs(fft(np.asanyarray(two_d_data_transpose[19])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_acc_jerk_magnitude.reshape(1, len(f_body_acc_jerk_magnitude)), axis=0)
+    # Add Frequency body gyro
+    f_body_gyro_x = np.abs(fft(np.asanyarray(two_d_data_transpose[6])) / 128)
+    f_body_gyro_y = np.abs(fft(np.asanyarray(two_d_data_transpose[7])) / 128)
+    f_body_gyro_z = np.abs(fft(np.asanyarray(two_d_data_transpose[8])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_gyro_x.reshape(1, len(f_body_gyro_x)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_gyro_y.reshape(1, len(f_body_gyro_y)), axis=0)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_gyro_z.reshape(1, len(f_body_gyro_z)), axis=0)
+    # Add Frequency body gyro mag
+    f_body_gyro_mag = np.abs(fft(np.asanyarray(two_d_data_transpose[20])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_gyro_mag.reshape(1, len(f_body_gyro_mag)), axis=0)
+    # Add Frequency body gyro jerk mag
+    f_body_gyro_jerk_mag = np.abs(fft(np.asanyarray(two_d_data_transpose[21])) / 128)
+    two_d_data_transpose = np.append(two_d_data_transpose,
+                                     f_body_gyro_jerk_mag.reshape(1, len(f_body_gyro_jerk_mag)), axis=0)
 
-        # features.extend(extract_features_t_body_acc_jerk(two_d_data_transpose[15], two_d_data_transpose[16],
-        #                                                  two_d_data_transpose[17]))
-        features.extend(extract_features_t_body_acc_mag(two_d_data_transpose[18]))
-        # features.extend(extract_features_t_body_acc_jerk_mag(two_d_data_transpose[21]))
-        # features.extend(extract_features_t_gravity_acc(two_d_data_transpose[3], two_d_data_transpose[4],
-        #                                                two_d_data_transpose[5]))
-        features.extend(extract_features_t_body_gyro(two_d_data_transpose[6], two_d_data_transpose[7],
-                                                     two_d_data_transpose[8]))
-        # features.extend(extract_features_t_body_gyro_jerk(two_d_data_transpose[12], two_d_data_transpose[13],
-        #                                                   two_d_data_transpose[14]))
-        features.extend(extract_features_t_body_gyro_mag(two_d_data_transpose[20]))
-        # features.extend(extract_features_t_body_gyro_jerk_mag(two_d_data_transpose[21]))
+    # Start extracting time features
+    features.extend(extract_features_t_body_acc(two_d_data_transpose[9], two_d_data_transpose[10],
+                                                two_d_data_transpose[11]))
 
-        # Start extracting frequency features
-        features.extend(extract_features_f_body_acc(two_d_data_transpose[22], two_d_data_transpose[23],
-                                                    two_d_data_transpose[24]))
-        # features.extend(extract_features_f_body_acc_jerk(two_d_data_transpose[25], two_d_data_transpose[26],
-        #                                                  two_d_data_transpose[27]))
-        features.extend(extract_features_f_body_acc_mag(two_d_data_transpose[28]))
-        # features.extend(extract_features_f_body_acc_jerk_mag(two_d_data_transpose[29]))
+    # features.extend(extract_features_t_body_acc_jerk(two_d_data_transpose[15], two_d_data_transpose[16],
+    #                                                  two_d_data_transpose[17]))
+    features.extend(extract_features_t_body_acc_mag(two_d_data_transpose[18]))
+    # features.extend(extract_features_t_body_acc_jerk_mag(two_d_data_transpose[21]))
+    # features.extend(extract_features_t_gravity_acc(two_d_data_transpose[3], two_d_data_transpose[4],
+    #                                                two_d_data_transpose[5]))
+    features.extend(extract_features_t_body_gyro(two_d_data_transpose[6], two_d_data_transpose[7],
+                                                 two_d_data_transpose[8]))
+    # features.extend(extract_features_t_body_gyro_jerk(two_d_data_transpose[12], two_d_data_transpose[13],
+    #                                                   two_d_data_transpose[14]))
+    features.extend(extract_features_t_body_gyro_mag(two_d_data_transpose[20]))
+    # features.extend(extract_features_t_body_gyro_jerk_mag(two_d_data_transpose[21]))
 
-        features.extend(extract_features_f_body_gyro(two_d_data_transpose[30], two_d_data_transpose[31],
-                                                     two_d_data_transpose[32]))
-        features.extend(extract_features_f_body_gyro_mag(two_d_data_transpose[33]))
-        features.extend(extract_features_f_body_gyro_jerk_mag(two_d_data_transpose[34]))
-        features_total.append(features)
+    # Start extracting frequency features
+    features.extend(extract_features_f_body_acc(two_d_data_transpose[22], two_d_data_transpose[23],
+                                                two_d_data_transpose[24]))
+    # features.extend(extract_features_f_body_acc_jerk(two_d_data_transpose[25], two_d_data_transpose[26],
+    #                                                  two_d_data_transpose[27]))
+    features.extend(extract_features_f_body_acc_mag(two_d_data_transpose[28]))
+    # features.extend(extract_features_f_body_acc_jerk_mag(two_d_data_transpose[29]))
 
-    return pd.DataFrame(features_total)
+    features.extend(extract_features_f_body_gyro(two_d_data_transpose[30], two_d_data_transpose[31],
+                                                 two_d_data_transpose[32]))
+    features.extend(extract_features_f_body_gyro_mag(two_d_data_transpose[33]))
+    features.extend(extract_features_f_body_gyro_jerk_mag(two_d_data_transpose[34]))
+
+    return features
 
 
