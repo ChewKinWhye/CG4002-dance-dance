@@ -6,6 +6,11 @@ from sklearn.metrics import accuracy_score
 from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.optimizers import Adam
+from keras.regularizers import l1
+
+from keras import initializers
+from keras import regularizers
 
 from MachineLearning.main_code.feature_extraction_final import extract_features
 
@@ -13,15 +18,31 @@ import os
 import numpy as np
 
 
+# This function takes in a array of size 3, and normalizes the data
+def normalize(data_points):
+    data_points[0] = (data_points[0] - (-19.61)) / (19.61 - (-19.61))
+    data_points[1] = (data_points[1] - (-19.61)) / (19.61 - (-19.61))
+    data_points[2] = (data_points[2] - (-19.61)) / (19.61 - (-19.61))
+    return data_points
+
+
 # This function takes in the input dimension of the features
 # and outputs the fully connected neural network model
 def create_neural_network_model(input_dimension, output_dimension):
+    opt = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+
     model = Sequential()
-    model.add(Dense(256, input_dim=input_dimension, activation='relu'))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(128, activation='relu'))
-    model.add(Dense(output_dimension, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+    model.add(Dense(256, input_dim=input_dimension, activation='relu', kernel_initializer='random_uniform',
+                    bias_initializer=initializers.Constant(0.1)))
+    model.add(Dense(256, activation='relu', kernel_initializer='random_uniform',
+                    bias_initializer=initializers.Constant(0.1)))
+    # model.add(Dense(256, activation='relu', kernel_initializer='random_uniform',
+    #                 bias_initializer=initializers.Constant(0.1)))
+    model.add(Dense(128, activation='relu', kernel_initializer='random_uniform',
+                    bias_initializer=initializers.Constant(0.1)))
+    model.add(Dense(output_dimension, activation='sigmoid', kernel_initializer='random_uniform',
+                    bias_initializer='zeros'))
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     return model
 
 
@@ -119,6 +140,11 @@ def load_dance_dance_action(text_file_path, text_file_partial_path, sampling_rat
         for row in data_file:
             string_split = row.split()
             string_split = list(map(float, string_split))
+            assert len(string_split) == 3
+            assert type(isinstance(string_split[0], float))
+            assert type(isinstance(string_split[1], float))
+            assert type(isinstance(string_split[2], float))
+            # string_split = normalize(string_split)
             x_partial_data_raw.append(string_split)
     # Extract features
     for i in range(len(x_partial_data_raw)//num_data_points*2-1):
