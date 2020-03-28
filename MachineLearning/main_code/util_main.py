@@ -7,7 +7,8 @@ from keras.models import model_from_json
 from keras.models import Sequential
 from keras.layers import Dense
 
-from MachineLearning.main_code.feature_extraction_final import extract_features
+#from MachineLearning.main_code.feature_extraction_final import extract_features
+from feature_extraction_final import extract_features
 
 import os
 import numpy as np
