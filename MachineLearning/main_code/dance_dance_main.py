@@ -1,8 +1,8 @@
 from MachineLearning.main_code.util_main import *
 from keras.callbacks import EarlyStopping
 from sklearn.utils import shuffle
-
 import numpy as np
+
 
 data_set_path = "Data-sets/Dance_Data"
 sampling_rate = 5
@@ -24,7 +24,7 @@ model_nn = create_neural_network_model(input_dimension=x_data.shape[1], output_d
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=15)
 
 model_nn.fit(x_train_data, y_train_OHE_data, validation_data=[x_test_data, y_test_OHE_data], epochs=2000,
-             batch_size=8, shuffle=True, callbacks=[es])
+             batch_size=32, shuffle=True, callbacks=[es])
 
 save_model(model_nn, "neural_network_model")
 confusion_matrix, accuracy = test_model_nn(model_nn, x_test_data, y_test_data)
