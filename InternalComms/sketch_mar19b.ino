@@ -9,20 +9,44 @@
 #define ACCEL_SCALE 0
 #define GYRO_SCALE 0
 #define PERIOD 100
-#define NUM_SENSORS 6
+#define NUM_SENSORS 3
 
 bool handshakeBool = false;
+int sensorInt;
 int16_t AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;
 char msg;
-char output[NUM_SENSORS*10] = "";
-char sensorString[10] = "";
+//char output[NUM_SENSORS*10] = "";
+char output[20] = "";
+char sensorString[6] = "";
 double sensorValues[NUM_SENSORS];
+int toSendData = true;
 void setup() {
   Serial.begin(115200);
+  // Set up timer
   Wire.begin();
   sensor_write_reg(PWR_MGMT_1, 0); // set to 0 to wakes up the MPU-6050
   sensor_write_reg(ACCEL_CONFIG, ACCEL_SCALE);
-  sensor_write_reg(GYRO_CONFIG, GYRO_SCALE); 
+  sensor_write_reg(GYRO_CONFIG, GYRO_SCALE);
+}
+// This function gets executed at 8Hz
+ISR(TIMER1_COMPA_vect) {
+  toSendData = true;
+}
+
+void startSendingData() {
+//  cli();
+  TCCR1A = 0;// set entire TCCR1A register to 0
+  TCCR1B = 0;// same for TCCR1B
+  TCNT1  = 0;//initialize counter value to 0
+  // set compare match register for 1hz increments
+  OCR1A = 3125;// = (16*10^6) / (1*1024) - 1 (must be <65536)
+  // turn on CTC mode
+  TCCR1B |= (1 << WGM12);
+  // Set CS10 and CS12 bits for 1024 prescaler
+  TCCR1B |= (1 << CS12) | (1 << CS10);  
+  // enable timer compare interrupt
+  TIMSK1 |= (1 << OCIE1A);
+//  sei();
 }
 void sensor_write_reg(int reg, uint8_t data){
   Wire.beginTransmission(I2C_ADDRESS);
@@ -46,15 +70,18 @@ void loop() {
       if(msg == 'H') {
         Serial.write("ACK");
         delay(500);
-        handshakeBool = true;      
+        handshakeBool = true;     
       }
     }
   }
-
+startSendingData();  
   while(true) {
-    getData();
-    pushData();
-    delay(100);
+    if (toSendData) {
+      getData();
+      pushData();
+      toSendData = false;
+    }
+    delay(5);
   }
 }
 
@@ -73,9 +100,9 @@ void getData() {
   sensorValues[0] = accel_preproc(AcX);
   sensorValues[1] = accel_preproc(AcY);
   sensorValues[2] = accel_preproc(AcZ);
-  sensorValues[3] = gyro_preproc(GyX);
-  sensorValues[4] = gyro_preproc(GyY);
-  sensorValues[5] = gyro_preproc(GyZ);
+//  sensorValues[3] = gyro_preproc(GyX);
+//  sensorValues[4] = gyro_preproc(GyY);
+//  sensorValues[5] = gyro_preproc(GyZ);
 }
 double accel_preproc(int16_t AcIn){
   double AcOut, g = 9.80665; // in unit of m/s^2
@@ -97,13 +124,18 @@ void pushData() {
   memset(sensorString,0,sizeof(sensorString));
   char final2Bytes[3] = " z";
   for(int i=0;i<NUM_SENSORS;i++) {
-    dtostrf(sensorValues[i],0,2,sensorString);
+    sensorInt = sensorValues[i]*100;
+    itoa(sensorInt,sensorString,10);
     strcat(output, sensorString);
+    strcat(output," ");
+  }
+  while(strlen(output) != 18) {
     strcat(output," ");
   }
   final2Bytes[0] = calcChecksum2(output);
   strcat(output,final2Bytes);
   Serial.print(output);
+//  Serial.println();
 }
 
 char calcChecksum2(char dataArr[]) {
@@ -115,3 +147,4 @@ char calcChecksum2(char dataArr[]) {
   checksum = (((int)checksum)%95) + 33;
   return checksum;
 }
+
