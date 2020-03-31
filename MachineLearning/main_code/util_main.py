@@ -12,7 +12,8 @@ from keras.regularizers import l1
 from keras import initializers
 from keras import regularizers
 
-from MachineLearning.main_code.feature_extraction_final import extract_features
+#from MachineLearning.main_code.feature_extraction_final import extract_features
+from feature_extraction_final import extract_features
 
 import os
 import numpy as np
