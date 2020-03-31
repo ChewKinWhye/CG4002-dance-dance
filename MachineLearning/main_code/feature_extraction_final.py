@@ -100,9 +100,9 @@ def extract_features_t_body_acc(acc_x, acc_y, acc_z):
     features.extend(obtain_ar_coefficients(acc_y, 4))
     features.extend(obtain_ar_coefficients(acc_z, 4))
 
-    features.append(obtain_correlation_coefficient(acc_x, acc_y))
-    features.append(obtain_correlation_coefficient(acc_z, acc_y))
-    features.append(obtain_correlation_coefficient(acc_x, acc_z))
+    #features.append(obtain_correlation_coefficient(acc_x, acc_y))
+    #features.append(obtain_correlation_coefficient(acc_z, acc_y))
+    #features.append(obtain_correlation_coefficient(acc_x, acc_z))
     return features
 
 
