@@ -148,10 +148,16 @@ def load_dance_dance_action(text_file_path, text_file_partial_path, sampling_rat
             # string_split = normalize(string_split)
             x_partial_data_raw.append(string_split)
     # Extract features
-    for i in range(len(x_partial_data_raw)//num_data_points*2-1):
+    # Calculate the number of data points in one window
+    num_data_points_per_window = int(sampling_rate * window_length)
+    # Calculate the number of windows. It is multiplied by 2 beacuse of the 50% overlap
+    number_of_windows = len(x_partial_data_raw)//num_data_points*2-1
+    for i in range(number_of_windows):
         window_slice_raw = []
-        for ii in range(num_data_points):
-            window_slice_raw.append(x_partial_data_raw[i*num_data_points//2 + ii])
+        for ii in range(num_data_points_per_window):
+            # Add num_data_points_per_window data points to window_slice_raw
+            window_slice_raw.append(x_partial_data_raw[i*num_data_points_per_window//2 + ii])
+        # Format window_slice_raw and extract the features
         window_slice_raw = np.asarray(window_slice_raw)[:, 0:3].tolist()
         window_slice_features = extract_features(window_slice_raw)
         x_partial_data.append(window_slice_features)
