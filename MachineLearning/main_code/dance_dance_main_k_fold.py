@@ -27,13 +27,10 @@ for train_index, test_index in kf.split(x_data):
     y_train_OHE, y_test_OHE = y_OHE_data[train_index], y_OHE_data[test_index]
     model_nn.fit(x_train, y_train_OHE, validation_data=(x_test, y_test_OHE), epochs=2000,
                  batch_size=8, shuffle=True, callbacks=[es])
-    save_model(model_nn, "neural_network_model")
     confusion_matrix, accuracy = test_model_nn(model_nn, x_test, y_data[test_index])
-    print(confusion_matrix)
-    # confusion_matrix_total += confusion_matrix
+    confusion_matrix_total += confusion_matrix
     accuracy_total += accuracy
-    # break
-# print(confusion_matrix_total/10)
+print(confusion_matrix_total/10)
 print("Accuracy: " + str(accuracy_total*10) + "%")
 
 
