@@ -37,8 +37,6 @@ def create_neural_network_model(input_dimension, output_dimension):
                     bias_initializer=initializers.Constant(0.1)))
     model.add(Dense(256, activation='relu', kernel_initializer='random_uniform',
                     bias_initializer=initializers.Constant(0.1)))
-    # model.add(Dense(256, activation='relu', kernel_initializer='random_uniform',
-    #                 bias_initializer=initializers.Constant(0.1)))
     model.add(Dense(128, activation='relu', kernel_initializer='random_uniform',
                     bias_initializer=initializers.Constant(0.1)))
     model.add(Dense(output_dimension, activation='sigmoid', kernel_initializer='random_uniform',
