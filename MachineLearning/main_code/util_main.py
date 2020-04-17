@@ -45,7 +45,21 @@ def create_neural_network_model(input_dimension, output_dimension):
                     bias_initializer='zeros'))
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     return model
+def create_convolutional_neural_network(input_dimension, output_dimension):
+    opt = Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
 
+    model = Sequential()
+    model.add(Conv2D(128, kernel_size=3, activation='relu', input_shape=(12, 6, 1)))
+    model.add(Conv2D(256, kernel_size=3, activation='relu'))
+    model.add(Flatten())
+    model.add(Dense(256, activation='relu', kernel_initializer='random_uniform',
+                    bias_initializer=initializers.Constant(0.1)))
+    model.add(Dense(128, activation='relu', kernel_initializer='random_uniform',
+                    bias_initializer=initializers.Constant(0.1)))
+    model.add(Dense(output_dimension, activation='sigmoid', kernel_initializer='random_uniform',
+                    bias_initializer='zeros'))
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+    return model
 
 # This function takes in the trained model, and the test data
 # and prints out the classification report (recall, precision, f-measure
